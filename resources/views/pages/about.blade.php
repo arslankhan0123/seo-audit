@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-24">
-    <div class="text-center mb-20" data-aos="fade-down">
+    <div class="text-center mb-20">
         <h1 class="text-4xl md:text-5xl font-extrabold mb-6">Demystifying the <span class="gradient-text neon-text">AI Auditor</span></h1>
         <p class="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
             Understanding the cutting-edge technology that powers our real-time SEO engine. We combine high-speed concurrent scraping with the deep reasoning capabilities of Google Gemini.

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'AI SEO Auditor')</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,12 +68,7 @@
             <div class="flex justify-between h-20 items-center">
                 <div class="flex-shrink-0 flex items-center">
                     <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tighter flex items-center gap-3 group">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-[0_0_20px_rgba(99,102,241,0.4)] group-hover:scale-105 transition-transform duration-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
+                        <img src="{{ asset('logo.png') }}" alt="Logo" class="w-10 h-10 object-contain drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] group-hover:scale-110 transition-transform duration-300">
                         <span class="gradient-text font-extrabold text-xl tracking-wide">SEO Auditor AI</span>
                     </a>
                 </div>
@@ -124,13 +121,8 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
                 <!-- Brand Column -->
                 <div class="col-span-1 md:col-span-1">
-                    <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tighter flex items-center gap-2 mb-6">
-                        <div class="w-8 h-8 rounded bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
+                    <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tighter flex items-center gap-2 mb-6 group">
+                        <img src="{{ asset('logo.png') }}" alt="Logo" class="w-8 h-8 object-contain drop-shadow-[0_0_10px_rgba(99,102,241,0.5)] group-hover:scale-110 transition-transform">
                         <span class="gradient-text font-extrabold text-lg">SEO Auditor AI</span>
                     </a>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6">
@@ -175,9 +167,9 @@
                 <div class="col-span-1">
                     <h4 class="text-white font-semibold mb-4 text-lg">Legal</h4>
                     <ul class="space-y-3">
-                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">Privacy Policy</a></li>
-                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">Terms of Service</a></li>
-                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">Cookie Policy</a></li>
+                        <li><a href="{{ route('privacy') }}" class="text-slate-400 hover:text-indigo-400 transition-colors">Privacy Policy</a></li>
+                        <li><a href="{{ route('terms') }}" class="text-slate-400 hover:text-indigo-400 transition-colors">Terms of Service</a></li>
+                        <li><a href="{{ route('cookies') }}" class="text-slate-400 hover:text-indigo-400 transition-colors">Cookie Policy</a></li>
                     </ul>
                 </div>
             </div>

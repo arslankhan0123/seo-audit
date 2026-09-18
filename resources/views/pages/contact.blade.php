@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-24">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
         <!-- Contact Info -->
-        <div data-aos="fade-right">
+        <div>
             <h1 class="text-4xl md:text-5xl font-extrabold mb-6">Get in <span class="gradient-text neon-text">Touch</span></h1>
             <p class="text-slate-400 text-lg mb-12 leading-relaxed">
                 Have a question about our Gemini AI integration? Want to integrate our auditor into your own agency's platform? Our engineering and support teams are here to help.
