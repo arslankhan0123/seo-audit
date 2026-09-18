@@ -75,6 +75,7 @@
                         <span class="gradient-text font-extrabold text-xl tracking-wide">SEO Auditor AI</span>
                     </a>
                 </div>
+                <!-- Desktop Menu -->
                 <div class="hidden md:flex space-x-8 items-center">
                     <a href="{{ route('home') }}" class="text-slate-300 hover:text-white transition-all font-medium text-sm border-b-2 border-transparent hover:border-indigo-400 pb-1">Home</a>
                     <a href="{{ route('auditor.index') }}" class="text-slate-300 hover:text-white transition-all font-medium text-sm border-b-2 border-transparent hover:border-indigo-400 pb-1">Auditor Tool</a>
@@ -84,6 +85,29 @@
                     <a href="{{ route('auditor.index') }}" class="px-6 py-2.5 rounded-full btn-gradient text-white font-semibold text-sm">
                         Start Free Audit
                     </a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-slate-300 hover:text-white focus:outline-none p-2 rounded-lg hover:bg-slate-800/50 transition-colors">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path id="menu-icon-bars" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path id="menu-icon-close" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-[#03070d]/95 backdrop-blur-xl border-b border-slate-800 shadow-2xl">
+            <div class="px-4 pt-2 pb-6 space-y-2">
+                <a href="{{ route('home') }}" class="block px-4 py-3 rounded-lg text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors">Home</a>
+                <a href="{{ route('auditor.index') }}" class="block px-4 py-3 rounded-lg text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors">Auditor Tool</a>
+                <a href="{{ route('about') }}" class="block px-4 py-3 rounded-lg text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors">Technology</a>
+                <a href="{{ route('contact') }}" class="block px-4 py-3 rounded-lg text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors">Contact</a>
+                <div class="pt-4 px-2">
+                    <a href="{{ route('auditor.index') }}" class="block w-full text-center px-6 py-3.5 rounded-xl btn-gradient text-white font-bold shadow-[0_0_15px_rgba(99,102,241,0.3)]">Start Free Audit</a>
                 </div>
             </div>
         </div>
@@ -189,6 +213,20 @@
                 nav.classList.add('bg-[#050b14]/75', 'border-white/5');
             }
         });
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const iconBars = document.getElementById('menu-icon-bars');
+        const iconClose = document.getElementById('menu-icon-close');
+
+        if(mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                iconBars.classList.toggle('hidden');
+                iconClose.classList.toggle('hidden');
+            });
+        }
     </script>
     
     @stack('scripts')
