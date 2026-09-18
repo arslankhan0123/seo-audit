@@ -15,10 +15,10 @@
     <div class="relative max-w-2xl mx-auto mb-16" data-aos="zoom-in">
         <form @submit.prevent="startAudit" class="relative flex items-center">
             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                <svg class="h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
             </div>
-            <input x-model="url" type="url" required class="block w-full pl-12 pr-32 py-5 bg-slate-800/80 border border-slate-600 rounded-full text-white placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/50 shadow-lg text-lg transition-all" placeholder="https://example.com">
-            <button type="submit" :disabled="isProcessing" class="absolute right-2 top-2 bottom-2 px-6 bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-bold rounded-full hover:shadow-[0_0_15px_rgba(56,189,248,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            <input x-model="url" type="url" required class="block w-full pl-12 pr-40 py-5 bg-[#050b14] border border-slate-700 rounded-full text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 shadow-lg text-lg transition-all" placeholder="https://example.com">
+            <button type="submit" :disabled="isProcessing" class="absolute right-2 top-2 bottom-2 px-8 btn-gradient text-white font-bold rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
                 <span x-show="!isProcessing">Audit Now</span>
                 <span x-show="isProcessing">Scanning...</span>
             </button>
@@ -26,41 +26,41 @@
     </div>
 
     <!-- Real-time Progress Section -->
-    <div x-show="isProcessing || auditComplete" x-cloak class="bg-slate-800/40 border border-slate-700 rounded-3xl p-8 backdrop-blur-md" data-aos="fade-up">
+    <div x-show="isProcessing || auditComplete" x-cloak class="bg-[#08101f] border border-white/5 rounded-3xl p-8 shadow-2xl" data-aos="fade-up">
         
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center justify-between mb-8 pb-6 border-b border-white/5">
             <div>
                 <h3 class="text-xl font-bold text-white mb-1" x-text="auditComplete ? 'Audit Complete' : 'Analyzing Website...'"></h3>
-                <p class="text-sm text-slate-400" x-text="statusMessage"></p>
+                <p class="text-sm text-indigo-400" x-text="statusMessage"></p>
             </div>
             
             <!-- Loader -->
             <div x-show="isProcessing" class="relative w-12 h-12">
-                <div class="absolute inset-0 rounded-full border-4 border-slate-700"></div>
-                <div class="absolute inset-0 rounded-full border-4 border-sky-500 border-t-transparent animate-spin"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-slate-800"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
             </div>
 
-            <!-- Download PDF Button (Shows when complete) -->
+            <!-- Download PDF Button -->
             <div x-show="auditComplete" x-cloak>
-                <a :href="'/auditor/download/' + auditId" class="px-5 py-2.5 rounded-full bg-white text-slate-900 font-bold hover:bg-slate-200 transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <a :href="'/auditor/download/' + auditId" class="px-6 py-3 rounded-full bg-indigo-500/10 text-indigo-400 font-bold border border-indigo-500/30 hover:bg-indigo-500 hover:text-white transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     Download PDF Report
                 </a>
             </div>
         </div>
 
         <!-- Crawled Pages Log -->
-        <div class="space-y-3 mb-8 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+        <div class="space-y-3 mb-8 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
             <template x-for="(log, index) in logs" :key="index">
-                <div class="flex items-center justify-between p-3 rounded-lg bg-slate-900/50 border border-slate-800 animate-fade-in">
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <div x-show="log.status === 'success'" class="text-emerald-400 shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <div class="flex items-center justify-between p-4 rounded-xl bg-[#050b14] border border-white/5 animate-fade-in transition-all">
+                    <div class="flex items-center gap-4 overflow-hidden w-full">
+                        <div x-show="log.status === 'success'" class="text-emerald-400 shrink-0 bg-emerald-400/10 p-1.5 rounded-full">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                         </div>
-                        <div x-show="log.status === 'processing'" class="text-sky-400 shrink-0 animate-pulse">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <div x-show="log.status === 'processing'" class="text-indigo-400 shrink-0 animate-spin">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         </div>
-                        <span class="text-sm text-slate-300 truncate" x-text="log.url"></span>
+                        <span class="text-sm font-mono text-slate-300 truncate" x-text="log.url"></span>
                     </div>
                 </div>
             </template>
