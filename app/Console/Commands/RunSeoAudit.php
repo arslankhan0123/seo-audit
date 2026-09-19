@@ -153,15 +153,24 @@ class RunSeoAudit extends Command
                 return;
             }
 
-            $prompt = "You are an expert Technical SEO Auditor. Analyze the following scraped data from a website and generate a professional, actionable SEO report.\n\n";
+            $prompt = "You are an expert Technical SEO Auditor. Analyze the following scraped data from a website and generate a highly readable, professional SEO report in Markdown format.\n\n";
+            $prompt .= "CRITICAL FORMATTING RULES:\n";
+            $prompt .= "- Use proper Markdown headers (## for main sections, ### for subsections).\n";
+            $prompt .= "- NEVER write long walls of text. Break down everything into easy-to-read bullet points.\n";
+            $prompt .= "- Use bold text (**like this**) for key metrics or important terms.\n\n";
             $prompt .= "Website: " . $baseUrl . "\n\n";
             $prompt .= json_encode($allPageData, JSON_PRETTY_PRINT) . "\n\n";
-            $prompt .= "Provide the report in Markdown format. Include:\n";
-            $prompt .= "1. Executive Summary\n";
-            $prompt .= "2. Strengths (What they are doing right)\n";
-            $prompt .= "3. Critical Issues & Weaknesses\n";
-            $prompt .= "4. Page-by-Page Breakdown\n";
-            $prompt .= "5. Actionable Roadmap for Improvement\n";
+            $prompt .= "Please structure your report exactly with these sections:\n";
+            $prompt .= "## 1. Executive Summary\n";
+            $prompt .= "(Brief 2-3 sentence overview)\n\n";
+            $prompt .= "## 2. Key Strengths\n";
+            $prompt .= "(List bullet points of what they are doing right)\n\n";
+            $prompt .= "## 3. Critical Issues & Weaknesses\n";
+            $prompt .= "(List bullet points of technical errors or missing SEO data)\n\n";
+            $prompt .= "## 4. Page-by-Page Breakdown\n";
+            $prompt .= "(Use bullet points to highlight issues on specific URLs)\n\n";
+            $prompt .= "## 5. Actionable Roadmap\n";
+            $prompt .= "(List step-by-step bullet points on how to fix the issues)";
 
             $model = 'gemini-2.5-flash';
             $geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . $geminiKey;
