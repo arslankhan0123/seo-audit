@@ -40,8 +40,14 @@ class RunSeoAudit extends Command
         }
 
         try {
-            $client = new Client(['verify' => false, 'timeout' => 15]);
-            $baseUrl = rtrim($audit->url, '/');
+            $client = new Client([
+                'verify' => false, 
+                'timeout' => 60,
+                'headers' => [
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                ]
+            ]);
+            $baseUrl = rtrim(trim($audit->url), '/');
             $host = parse_url($baseUrl, PHP_URL_HOST);
 
             $this->info("Fetching homepage: " . $baseUrl);
@@ -50,7 +56,7 @@ class RunSeoAudit extends Command
             $response = $client->get($baseUrl);
             $html = (string) $response->getBody();
             
-            $crawler = new Crawler($html);
+            $crawler = new Crawler($html, $baseUrl);
             $links = $crawler->filter('a')->links();
             
             $urlsToProcess = [$baseUrl];
@@ -138,7 +144,8 @@ class RunSeoAudit extends Command
             $prompt .= "4. Page-by-Page Breakdown\n";
             $prompt .= "5. Actionable Roadmap for Improvement\n";
 
-            $geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $geminiKey;
+            $model = 'gemini-2.5-flash';
+            $geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . $geminiKey;
             
             $geminiResponse = $client->post($geminiUrl, [
                 'headers' => ['Content-Type' => 'application/json'],
