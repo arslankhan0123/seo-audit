@@ -12,23 +12,9 @@ use Illuminate\Support\Str;
 
 class RunSeoAudit extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'audit:run {audit_id}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Runs the SEO audit for the given ID';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         $auditId = $this->argument('audit_id');
@@ -42,32 +28,52 @@ class RunSeoAudit extends Command
         try {
             $client = new Client([
                 'verify' => false, 
-                'timeout' => 60,
+                'timeout' => 45,
                 'headers' => [
-                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                    'Accept-Language' => 'en-US,en;q=0.5',
                 ]
             ]);
             $baseUrl = rtrim(trim($audit->url), '/');
+            
+            // Add http:// if missing entirely
+            if (!preg_match("~^(?:f|ht)tps?://~i", $baseUrl)) {
+                $baseUrl = "https://" . $baseUrl;
+            }
+
             $host = parse_url($baseUrl, PHP_URL_HOST);
 
             $this->info("Fetching homepage: " . $baseUrl);
             
-            // 1. Fetch homepage to get links
-            $response = $client->get($baseUrl);
-            $html = (string) $response->getBody();
+            // 1. Fetch homepage robustly
+            $html = $this->fetchHtmlRobustly($baseUrl, $client);
+            
+            if (!$html) {
+                // If homepage completely fails, don't crash with an error. Handle gracefully.
+                $audit->update([
+                    'status' => 'failed',
+                    'final_report' => "## 🚨 Website Unreachable\n\nWe were unable to connect to **`{$baseUrl}`**.\n\nThis can happen for a few reasons:\n- The website is currently offline or the domain doesn't exist.\n- The website has a strict firewall (like Cloudflare) that blocks automated crawlers.\n- The server took too long to respond.\n\n**Action:** Please verify the URL and try again."
+                ]);
+                return;
+            }
             
             $crawler = new Crawler($html, $baseUrl);
             $links = $crawler->filter('a')->links();
             
             $urlsToProcess = [$baseUrl];
             foreach ($links as $link) {
-                $uri = $link->getUri();
-                // Ensure it's internal and we don't process too many to avoid timeout
-                if (str_contains($uri, $host) && !in_array($uri, $urlsToProcess) && count($urlsToProcess) < 5) {
-                    // Ignore anchors and complex queries for simple audit
-                    if (!str_contains($uri, '#')) {
-                        $urlsToProcess[] = rtrim($uri, '/');
+                try {
+                    $uri = $link->getUri();
+                    // Ensure it's internal and we don't process too many to avoid timeout
+                    if (str_contains($uri, (string)$host) && !in_array($uri, $urlsToProcess) && count($urlsToProcess) < 5) {
+                        // Ignore anchors and complex queries for simple audit
+                        if (!str_contains($uri, '#')) {
+                            $urlsToProcess[] = rtrim($uri, '/');
+                        }
                     }
+                } catch (\Exception $e) {
+                    continue;
                 }
             }
 
@@ -83,8 +89,13 @@ class RunSeoAudit extends Command
                 ]);
 
                 try {
-                    $pageResponse = $client->get($url);
-                    $pageHtml = (string) $pageResponse->getBody();
+                    $pageHtml = $this->fetchHtmlRobustly($url, $client);
+                    
+                    if (!$pageHtml) {
+                        $pageAudit->update(['status' => 'failed', 'data' => ['error' => 'Unreachable']]);
+                        continue;
+                    }
+
                     $pageCrawler = new Crawler($pageHtml);
                     
                     $title = $pageCrawler->filter('title')->count() > 0 ? $pageCrawler->filter('title')->text() : null;
@@ -122,13 +133,21 @@ class RunSeoAudit extends Command
                 }
             }
 
+            if (count($allPageData) === 0) {
+                 $audit->update([
+                    'status' => 'failed',
+                    'final_report' => "## 🚨 Analysis Failed\n\nWe could not extract any meaningful data from `{$baseUrl}`. The site might be using JavaScript to render content or blocking our crawler."
+                ]);
+                return;
+            }
+
             // 3. Send to Gemini
             $this->info("Sending to Gemini...");
             $geminiKey = env('GEMINI_API_KEY');
             
             if (!$geminiKey) {
                 $audit->update([
-                    'status' => 'completed',
+                    'status' => 'failed',
                     'final_report' => "## API Key Missing\nPlease add `GEMINI_API_KEY` to your `.env` file to generate AI insights."
                 ]);
                 return;
@@ -169,10 +188,85 @@ class RunSeoAudit extends Command
 
         } catch (\Exception $e) {
             Log::error("SEO Audit Error: " . $e->getMessage());
+            // Graceful fallback instead of raw error output
             $audit->update([
                 'status' => 'failed',
-                'final_report' => 'An error occurred during crawling: ' . $e->getMessage()
+                'final_report' => "## 🚨 Unexpected Interruption\n\nThe audit process encountered an unexpected issue while generating the report. Please try again later."
             ]);
         }
+    }
+
+    /**
+     * A highly robust HTML fetcher that tries multiple methods and fallbacks
+     * to guarantee it gets the content or fails gracefully without throwing exceptions.
+     */
+    private function fetchHtmlRobustly($url, $client)
+    {
+        $urlsToTry = [$url];
+        
+        // If DNS fails, sometimes adding or removing 'www.' fixes it
+        $parsed = parse_url($url);
+        $host = $parsed['host'] ?? '';
+        if ($host) {
+            if (str_starts_with($host, 'www.')) {
+                $urlsToTry[] = str_replace($host, substr($host, 4), $url);
+            } else {
+                $urlsToTry[] = str_replace($host, 'www.' . $host, $url);
+            }
+        }
+
+        foreach ($urlsToTry as $targetUrl) {
+            // Method 1: Guzzle
+            try {
+                $response = $client->get($targetUrl);
+                return (string) $response->getBody();
+            } catch (\Exception $e) {
+                // Ignore and try fallback
+            }
+
+            // Method 2: Native PHP file_get_contents (bypasses Guzzle cURL completely)
+            try {
+                $context = stream_context_create([
+                    "http" => [
+                        "method" => "GET",
+                        "header" => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\r\nAccept: text/html\r\n",
+                        "timeout" => 30,
+                        "ignore_errors" => true
+                    ],
+                    "ssl" => [
+                        "verify_peer" => false,
+                        "verify_peer_name" => false,
+                    ]
+                ]);
+                $html = @file_get_contents($targetUrl, false, $context);
+                if ($html && strlen($html) > 100) {
+                    return $html;
+                }
+            } catch (\Exception $e) {
+                // Ignore
+            }
+
+            // Method 3: Native raw cURL (if available)
+            if (function_exists('curl_init')) {
+                try {
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, $targetUrl);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+                    $html = curl_exec($ch);
+                    curl_close($ch);
+                    if ($html && strlen($html) > 100) {
+                        return $html;
+                    }
+                } catch (\Exception $e) {
+                    // Ignore
+                }
+            }
+        }
+
+        return false;
     }
 }
